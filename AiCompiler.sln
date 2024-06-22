@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AiCompiler", "AiCompiler\AiCompiler.csproj", "{5714A4C4-F893-440D-B104-C543ABD9880F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AiCompiler.Test", "AiCompiler.Test\AiCompiler.Test.csproj", "{0D09640F-6EFA-4EC6-936A-75CF180DE351}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5714A4C4-F893-440D-B104-C543ABD9880F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5714A4C4-F893-440D-B104-C543ABD9880F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5714A4C4-F893-440D-B104-C543ABD9880F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5714A4C4-F893-440D-B104-C543ABD9880F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D09640F-6EFA-4EC6-936A-75CF180DE351}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D09640F-6EFA-4EC6-936A-75CF180DE351}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D09640F-6EFA-4EC6-936A-75CF180DE351}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D09640F-6EFA-4EC6-936A-75CF180DE351}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
