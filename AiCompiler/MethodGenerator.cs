@@ -1,6 +1,8 @@
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.ML.OnnxRuntimeGenAI;
 
 namespace AiCompiler;
 
@@ -70,6 +72,8 @@ public class MethodGenerator : IIncrementalGenerator
         var methodSignature =
             $"{methodAccessibility} partial {methodStatic} {methodReadOnly} {methodReturnType} {methodName}({methodParameters})";
 
+        var methodBody = GenerateMethodBody(methodComments, methodSignature);
+
         productionContext.AddSource(
             $"{className}.{methodName}.g.cs",
             $$"""
@@ -79,10 +83,30 @@ public class MethodGenerator : IIncrementalGenerator
             {
                 {{methodSignature}}
                 {
-                    throw new global::System.NotImplementedException();
+                    {{methodBody}}
                 }
             }
             """
         );
+    }
+
+    public static string GenerateMethodBody(string methodComments, string methodSignature)
+    {
+        throw new System.Exception("Model path not provided");
+        using var model = new Model(@"model path");
+        using var tokenizer = new Tokenizer(model);
+
+        using var tokens = tokenizer.Encode(
+            $"""
+            You are an expert C# developer. You are tasked with implementing a method with the following comments
+            {methodComments}
+            and the following signature
+            {methodSignature}
+            """
+        );
+        using var generatorParams = new GeneratorParams(model);
+
+        using var outputTokens = model.Generate(generatorParams);
+        return string.Concat(tokenizer.DecodeBatch(outputTokens));
     }
 }
