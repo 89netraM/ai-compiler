@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <Version>0.0.0.6</Version>
+    <Version>0.0.0.13</Version>
   </PropertyGroup>
 
   <ItemGroup>

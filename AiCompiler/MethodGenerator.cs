@@ -1,8 +1,8 @@
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.ML.OnnxRuntimeGenAI;
 
 namespace AiCompiler;
@@ -73,7 +73,7 @@ public class MethodGenerator : IIncrementalGenerator
         var methodSignature =
             $"{methodAccessibility} partial {methodStatic} {methodReadOnly} {methodReturnType} {methodName}({methodParameters})";
 
-        var methodBody = GenerateMethodBody(methodComments, methodSignature);
+        var methodBody = GenerateMethodBody(methodComments, methodSignature, productionContext.CancellationToken);
 
         productionContext.AddSource(
             $"{className}.{methodName}.g.cs",
@@ -91,9 +91,13 @@ public class MethodGenerator : IIncrementalGenerator
         );
     }
 
-    public static string GenerateMethodBody(string methodComments, string methodSignature)
+    public static string GenerateMethodBody(
+        string methodComments,
+        string methodSignature,
+        CancellationToken cancellationToken
+    )
     {
-        using var model = new Model(@"..\phi3-mini\cpu_and_mobile\cpu-int4-rtn-block-32-acc-level-4");
+        using var model = ModelDownloader.GetModel(cancellationToken);
         using var tokenizer = new Tokenizer(model);
 
         using var tokens = tokenizer.Encode(
