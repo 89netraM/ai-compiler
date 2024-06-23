@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.ML.OnnxRuntimeGenAI;
 
-using var model = new Model(@"C:\Users\marten.asberg\Downloads\phi3-cpu\");
+using var model = new Model(@"..\phi3-mini\cpu_and_mobile\cpu-int4-rtn-block-32-acc-level-4");
 using var tokenizer = new Tokenizer(model);
 
 using var tokens = tokenizer.Encode(
