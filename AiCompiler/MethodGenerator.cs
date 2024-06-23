@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -14,13 +15,15 @@ public class MethodGenerator : IIncrementalGenerator
     {
         context.RegisterPostInitializationOutput(GenerateAiAttribute);
 
-        var aiGeneratedMethods = context.SyntaxProvider.ForAttributeWithMetadataName(
-            "AiCompiler.AiGeneratedAttribute",
-            (node, cancellationToken) => true,
-            (context, cancellationToken) => context
-        );
+        var aiGeneratedMethods = context
+            .SyntaxProvider.ForAttributeWithMetadataName(
+                "AiCompiler.AiGeneratedAttribute",
+                (node, cancellationToken) => true,
+                Transform
+            )
+            .Where(i => i is not null);
 
-        context.RegisterSourceOutput(aiGeneratedMethods, GenerateAiMethod);
+        context.RegisterSourceOutput(aiGeneratedMethods, GenerateAiMethod!);
     }
 
     private static void GenerateAiAttribute(IncrementalGeneratorPostInitializationContext context)
@@ -31,20 +34,20 @@ public class MethodGenerator : IIncrementalGenerator
             namespace AiCompiler;
 
             [global::System.AttributeUsage(global::System.AttributeTargets.Method)]
-            public class AiGeneratedAttribute : global::System.Attribute;
+            internal class AiGeneratedAttribute : global::System.Attribute;
             """
         );
     }
 
-    private static void GenerateAiMethod(
-        SourceProductionContext productionContext,
-        GeneratorAttributeSyntaxContext attributeContext
+    private static MethodGenerationInformation? Transform(
+        GeneratorAttributeSyntaxContext context,
+        CancellationToken cancellationToken
     )
     {
-        var methodNode = attributeContext.TargetNode;
-        if (attributeContext.SemanticModel.GetDeclaredSymbol(methodNode) is not IMethodSymbol methodSymbol)
+        var methodNode = context.TargetNode;
+        if (context.SemanticModel.GetDeclaredSymbol(methodNode) is not IMethodSymbol methodSymbol)
         {
-            return;
+            return null;
         }
 
         var namespaceName = methodSymbol.ContainingNamespace.ToDisplayString();
@@ -73,16 +76,21 @@ public class MethodGenerator : IIncrementalGenerator
         var methodSignature =
             $"{methodAccessibility} partial {methodStatic} {methodReadOnly} {methodReturnType} {methodName}({methodParameters})";
 
-        var methodBody = GenerateMethodBody(methodComments, methodSignature, productionContext.CancellationToken);
+        return new(namespaceName, className, methodName, methodSignature, methodComments);
+    }
+
+    private static void GenerateAiMethod(SourceProductionContext productionContext, MethodGenerationInformation info)
+    {
+        var methodBody = GenerateMethodBody(info.Comments, info.Signature, productionContext.CancellationToken);
 
         productionContext.AddSource(
-            $"{className}.{methodName}.g.cs",
+            $"{info.Namespace}.{info.Class}.{info.Method}.g.cs",
             $$"""
-            namespace {{namespaceName}};
+            namespace {{info.Namespace}};
 
-            partial class {{className}}
+            partial class {{info.Class}}
             {
-                {{methodSignature}}
+                {{info.Signature}}
                 {
                     {{methodBody}}
                 }
@@ -137,5 +145,35 @@ public class MethodGenerator : IIncrementalGenerator
         }
 
         return sb.ToString();
+    }
+
+    private class MethodGenerationInformation(
+        string @namespace,
+        string @class,
+        string method,
+        string signature,
+        string comments
+    ) : IEquatable<MethodGenerationInformation>
+    {
+        public string Namespace { get; } = @namespace;
+        public string Class { get; } = @class;
+        public string Method { get; } = method;
+        public string Signature { get; } = signature;
+        public string Comments { get; } = comments;
+
+        public bool Equals(MethodGenerationInformation other) =>
+            Namespace == other.Namespace
+            && Class == other.Class
+            && Method == other.Method
+            && Signature == other.Signature
+            && Comments == other.Comments;
+
+        public override bool Equals(object obj) => obj is MethodGenerationInformation other && Equals(other);
+
+        public override int GetHashCode() => HashCode.Combine(Namespace, Class, Method, Signature, Comments);
+
+        public static bool operator ==(MethodGenerationInformation a, MethodGenerationInformation b) => a.Equals(b);
+
+        public static bool operator !=(MethodGenerationInformation a, MethodGenerationInformation b) => !(a == b);
     }
 }
