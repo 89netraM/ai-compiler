@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -92,21 +93,45 @@ public class MethodGenerator : IIncrementalGenerator
 
     public static string GenerateMethodBody(string methodComments, string methodSignature)
     {
-        throw new System.Exception("Model path not provided");
-        using var model = new Model(@"model path");
+        using var model = new Model(@"..\phi3-mini\cpu_and_mobile\cpu-int4-rtn-block-32-acc-level-4");
         using var tokenizer = new Tokenizer(model);
 
         using var tokens = tokenizer.Encode(
             $"""
-            You are an expert C# developer. You are tasked with implementing a method with the following comments
+            <|system|>
+            You are an expert C# developer. You are tasked with implementing a method
+            given the documentation and signature.
+            When using libraries, you can not assume they are imported. Always fully
+            qualify types, with global:: and namespaces. Even for the standard library.
+            You only ever respond with the body of the method. No additional information
+            or comments are needed. The code should be correct and complete. No
+            formatting. No imports. No boilerplate code. No additional methods. No
+            method declaration. Only the body of the method.
+            <|end|>
+            <|user|>
             {methodComments}
-            and the following signature
             {methodSignature}
+            <|end|>
+            <|assistant|>
             """
         );
-        using var generatorParams = new GeneratorParams(model);
 
-        using var outputTokens = model.Generate(generatorParams);
-        return string.Concat(tokenizer.DecodeBatch(outputTokens));
+        using var generatorParams = new GeneratorParams(model);
+        generatorParams.SetInputSequences(tokens);
+
+        using var generator = new Generator(model, generatorParams);
+
+        var sb = new StringBuilder();
+        while (!generator.IsDone())
+        {
+            generator.ComputeLogits();
+            generator.GenerateNextToken();
+            var outputTokens = generator.GetSequence(0);
+            var newToken = outputTokens.Slice(outputTokens.Length - 1, 1);
+            var output = tokenizer.Decode(newToken);
+            sb.Append(output);
+        }
+
+        return sb.ToString();
     }
 }
