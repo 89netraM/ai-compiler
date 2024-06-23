@@ -6,7 +6,15 @@
     <Nullable>enable</Nullable>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <Version>0.0.0.19</Version>
+    <PackageId>AiCompiler</PackageId>
+    <PackageVersion>0.1.0.0</PackageVersion>
+    <Version>0.1.0.0</Version>
+    <Authors>Netram</Authors>
+    <Description>Compile with an AI (don't)</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/89netraM/ai-compiler</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/89netraM/ai-compiler</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,6 +31,7 @@
   </ItemGroup>
 
     <ItemGroup>
+      <None Include="..\README.md" Pack="true" PackagePath="" />
       <None Include="$(OutputPath)\AiCompiler.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
       <None Include="$(PKGMicrosoft_ML_OnnxRuntimeGenAI_Managed)\lib\netstandard2.0\Microsoft.ML.OnnxRuntimeGenAI.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
       <None Include="$(PKGMicrosoft_ML_OnnxRuntimeGenAI_DirectML)\runtimes\win-x64\native\onnxruntime.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
